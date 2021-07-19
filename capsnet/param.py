@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 from typing import Dict
 
 
@@ -9,14 +10,15 @@ class CapsNetParam(object):
     Attributes:
         conv1_filter (int; default=256): Number of filters for the convolution 
             in the `FeatureMap` instance.
-        conv1_kernel (int; default=9): A length of the kernel for the convoluti
-            on in the `FeatureMap` instance.
+        conv1_kernel (int; default=9): A size of the kernel for the convoluton
+            in the `FeatureMap` instance.
         conv1_stride (int; default=1): A size of stride for the convolution in
             the `FeatureMap` instance.
-        conv2_filter (int; default=num_primary*dim_primary): Number of filters 
-            for the convolution in the `PrimaryCap` instance.
-        conv2_kernel (int; default=9): A length of the kernel for the convoluti
-            on in the `PrimaryCap` instance.
+        conv2_filter (int; default=256): Number of filters for the convolution 
+            in the `PrimaryCap` instance. Always initialized as the product of 
+            `num_primary` and `dim_primary`. 
+        conv2_kernel (int; default=9): A size of the kernel for the convolution
+            in the `PrimaryCap` instance.
         conv2_stride (int; default=2): A size of stride for the convolution in 
             the `PrimaryCap` instance.
         num_primary (int; default=32): Number of primary capsules for each grid
@@ -45,7 +47,8 @@ class CapsNetParam(object):
                  dim_primary: int = 8,
                  num_digit: int = 10,
                  dim_digit: int = 16,
-                 num_routings: int = 3) -> None:
+                 num_routings: int = 3,
+                 **kwargs) -> None:
         self.conv1_filter = conv1_filter
         self.conv1_kernel = conv1_kernel
         self.conv1_stride = conv1_stride
@@ -73,19 +76,19 @@ class CapsNetParam(object):
             "num_routings": self.num_routings
         }
 
-    def save_config(self, path: str) -> None:
+    def save(self, path: str) -> None:
         """Saves configuration.
         
         Collects attributes as pair of name and value and save them to a UTF-8 
         encoded file.
 
         Args:
-            path (str): A filepath to save configuration. If any file aleardy 
-                exists, its content will be overwritten.
+            path (str): A filepath to write configuration. If any file already 
+                exists, its contents will be overwritten.
         
         Raises:
             TypeError: If `path` is not string.
-            ValueError: If `path` is empty string.
+            ValueError: If `path` is empty.
         """
         if not isinstance(path, str):
             raise TypeError()
@@ -97,7 +100,25 @@ class CapsNetParam(object):
                     f.writelines(f"{k}={v}\n")
 
 
-def load_config(path: str) -> CapsNetParam:
+def load_param(path: str) -> CapsNetParam:
+    """Loads configuration.
+        
+    Reads file with the given path and makes `CapsNetParam` instance by parsing
+    the contents.
+
+    Args:
+        path (str): A filepath to read configuration.
+    
+    Returns:
+        A `CapsNetParam` instance.
+
+    Raises:
+        TypeError: If `path` is not string.
+        ValueError: If `path` is empty.
+        FileNotFoundError: If file of `path` not exists.
+    """
+    if not os.path.isfile(path):
+        raise FileNotFoundError()
 
     with open(path, 'r', encoding="utf8") as f:
         config = []
