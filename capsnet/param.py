@@ -79,7 +79,7 @@ class CapsNetParam(object):
     def save(self, path: str) -> None:
         """Saves configuration.
         
-        Collects attributes as pair of name and value and save them to a UTF-8 
+        Collects attributes as pair of name and value and saves them to a UTF-8
         encoded file.
 
         Args:
@@ -117,7 +117,11 @@ def load_param(path: str) -> CapsNetParam:
         ValueError: If `path` is empty.
         FileNotFoundError: If file of `path` not exists.
     """
-    if not os.path.isfile(path):
+    if not isinstance(path, str):
+        raise TypeError()
+    elif len(path) == 0:
+        raise ValueError()
+    elif not os.path.isfile(path):
         raise FileNotFoundError()
 
     with open(path, 'r', encoding="utf8") as f:

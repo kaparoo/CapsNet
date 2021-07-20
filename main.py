@@ -35,6 +35,8 @@ def _get_mnist_dataset(
 
 def main(_) -> None:
     param = capsnet.make_param()
+    model = capsnet.make_model(param)
+    (X_train, y_train), (X_test, y_test) = _get_mnist_dataset(param.num_digit)
 
     checkpoint_dir = FLAGS.checkpoint_dir
     initial_epoch = 0
@@ -42,19 +44,19 @@ def main(_) -> None:
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
     else:
-        pass
-
-    (X_train, y_train), _ = _get_mnist_dataset(param.num_digit)
-    model = capsnet.make_model(param)
+        checkpoints = [file for file in os.listdir(checkpoint_dir) if "ckpt" in file]
+        checkpoints.sort()
+        checkpoint_name = checkpoints[-1].split(".")[0]
+        initial_epoch = int(checkpoint_name)
+        model.load_weights(filepath=f"{checkpoint_dir}/{checkpoint_name}.ckpt")
 
     model.fit(x=X_train,
               y=y_train,
               validation_split=FLAGS.validation_split,
               initial_epoch=initial_epoch,
-              epochs=FLAGS.num_epochs + initial_epoch)
-
+              epochs=initial_epoch+FLAGS.num_epochs,
+              callbacks=capsnet.get_callbacks(checkpoint_dir))
     model.save(f"{checkpoint_dir}/model")
-
 
 if __name__ == "__main__":
     app.run(main)

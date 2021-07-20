@@ -18,9 +18,12 @@ class CapsNet(tf.keras.models.Model):
     def __init__(self, param: CapsNetParam) -> None:
         super(CapsNet, self).__init__(name="CapsNet")
         self.param = param
+
+    def build(self, _) -> tf.TensorShape:
         self.feature_map = FeatureMap(self.param)
         self.primary_cap = PrimaryCap(self.param)
         self.digit_cap = DigitCap(self.param)
+        self.built = True
 
     def call(self, input_images: tf.Tensor) -> tf.Tensor:
         feature_maps = self.feature_map(input_images)
